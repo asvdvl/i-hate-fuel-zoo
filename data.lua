@@ -6,17 +6,17 @@ data:extend({
     {
         type = "fluid",
         name = fuel_names.fluid,
-        icons = {
+        icons = {{
             icon = "__base__/graphics/icons/fluid/light-oil.png",
             icon_size = 64,
             icon_mipmaps = 4,
-            tint = {r=1, g=0.1, b=0.1}
-        },
+            tint = {r=1, g=0.2, b=0.5}
+        }},
         heat_capacity = "1MJ",
         base_color = {r=1, g=0.1, b=0.1},
-        flow_color = {r=1, g=0.5, b=0.5},
+        flow_color = {r=1, g=1, b=1},
         default_temperature = 15,
-        max_temperature = math.huge
+        max_temperature = 100
     }
 })
 
@@ -35,7 +35,6 @@ else
     assembler_proto.module_specification.module_slots = 1
 
     data:extend({assembler_proto})
-    log()
 end
 
 if mods["aai-industry"] then
