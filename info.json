@@ -1,12 +1,12 @@
 {
-    "title": "factorio-mod-template",
-    "name": "factorio-mod-template",
+    "title": "I hate fuel zoo",
+    "name": "i-hate-fuel-zoo",
     "author": "asvdev(in game - Dial-up)",
     "factorio_version": "1.1",
     "version": "0.0.0",
-    "dependencies": ["base >= 1.1.0"],
-    "description": "factorio-mod-template - template for my mods",
-    "homepage": "https://github.com/asvdvl/factorio-mod-template",
+    "dependencies": ["base >= 1.1.0", "? aai-industry"],
+    "description": "a mod that allows you to convert all flammable materials and liquids into one type",
+    "homepage": "https://github.com/asvdvl/i-hate-fuel-zoo",
     "package":{
         "ignore":[
         ]
