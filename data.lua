@@ -3,7 +3,7 @@ local assembler = "fuel-unifier"
 local fuel_params = {
     fluid = {
         name = "heat-transfer-fluid",
-        value = "1MJ"
+        value = "10MJ"
     },
     item = {
         name = "heat-conducting-fuel",
@@ -51,7 +51,8 @@ else
     assembler_proto.name = assembler
     assembler_proto.module_specification.module_slots = 0
     assembler_proto.crafting_categories = {category}
-    assembler_proto.energy_usage = fuel_params.fluid.value
+    assembler_proto.energy_usage = "11MW"
+    assembler_proto.allowed_effects = {}
 
     assembler_proto.energy_source = {
         type = "burner",
@@ -100,7 +101,6 @@ else
         end
     end
     data:extend(protos)
-
     data:extend({
         {
             type = "recipe",
@@ -128,22 +128,33 @@ data:extend({
 })
 
 --assembler
-local input_fb = {}
-local asm_fluid_input = assembler.."-fluid-input"
+local input_fb = {
+    pipe_connections = {},
+    production_type = "input-output",
+    pipe_covers = {},
+    pipe_picture = {},
+    base_area = 1,
+    base_level = -1,
+    height = 2,
+}
+local asm_fluid_input = 'fluid-'..assembler
 local assembler_proto = table.deepcopy(data.raw["assembling-machine"][assembler])
 assembler_proto.name = asm_fluid_input
-assembler_proto.energy_usage = fuel_params.fluid.value
+assembler_proto.icons[1].tint = table.deepcopy(tint)
+assembler_proto.icons[1].tint[3] = 0.8
 
 for key, fb in pairs(assembler_proto.fluid_boxes) do
     if fb.production_type == "input" then
-        input_fb = fb
+        table.insert(input_fb.pipe_connections, fb.pipe_connections[1])
+        input_fb.pipe_covers = fb.pipe_covers
+        input_fb.pipe_picture = fb.pipe_picture
         assembler_proto.fluid_boxes[key] = nil
-        break
     end
 end
 assembler_proto.energy_source = {
     type = "fluid",
     fluid_box = input_fb,
+    burns_fluid = true,
     scale_fluid_usage = true
 }
 
@@ -152,4 +163,4 @@ local assembler_item_proto = table.deepcopy(data.raw["item"][assembler])
 assembler_item_proto.name = asm_fluid_input
 assembler_item_proto.place_result = asm_fluid_input
 
-
+data:extend({assembler_proto, assembler_item_proto})
