@@ -11,6 +11,7 @@ local fuel_params = {
     }
 }
 local tint = {1, 0.5, 0.5}
+local timeToCraft = 100 / settings.startup["i-hate-fuel-zoo-convert-efficiency"].value
 
 data:extend({
     {
@@ -51,7 +52,7 @@ else
     assembler_proto.name = assembler
     assembler_proto.module_specification.module_slots = 0
     assembler_proto.crafting_categories = {category}
-    assembler_proto.energy_usage = "11MW"
+    assembler_proto.energy_usage = "10MW"
     assembler_proto.allowed_effects = {}
 
     assembler_proto.energy_source = {
@@ -106,7 +107,7 @@ else
             type = "recipe",
             name = fuel_params.item.name,
             enabled = true,
-            energy_required = 1,
+            energy_required = timeToCraft,
             ingredients = {},
             category = category,
             results = {{type = 'item', name = fuel_params.item.name, amount = 1}},
@@ -120,7 +121,7 @@ data:extend({
         type = "recipe",
         name = fuel_params.fluid.name,
         enabled = true,
-        energy_required = 1,
+        energy_required = timeToCraft,
         ingredients = {},
         category = category,
         results = {{type = 'fluid', name = fuel_params.fluid.name, amount = 1}},
