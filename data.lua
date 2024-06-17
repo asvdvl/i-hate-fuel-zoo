@@ -1,6 +1,10 @@
 local category = "fuel-unification"
 local assembler = "fuel-unifier"
-local item_recipe_name = ""
+local fluid_assembler = 'fluid-'..assembler
+local parent_assembler_name = "chemical-plant"
+
+assert(data.raw["assembling-machine"][parent_assembler_name] and data.raw["item"][parent_assembler_name], "\n\ncant find "..parent_assembler_name.."\n\n")
+
 local fuel_params = {
     fluid = {
         name = "heat-transfer-fluid",
@@ -15,86 +19,90 @@ local tint = {1, 0.5, 0.5}
 local timeToCraft = 100 / settings.startup["i-hate-fuel-zoo-convert-efficiency"].value
 
 local function get_parent_assembler()
-    return table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
+    return table.deepcopy(data.raw["assembling-machine"][parent_assembler_name])
 end
 
-if mods["aai-industry"] then
-    category = "fuel-processing"
-    assembler = "fuel-processor"
-    local asm = data.raw["assembling-machine"]["fuel-processor"]
-    asm.fixed_recipe = ""
-    item_recipe_name = "fuel-processing"
-    fuel_params.item.name = "processed-fuel"
-    fuel_params.item.value = data.raw["item"]["processed-fuel"].fuel_value
-    fuel_params.fluid.value = fuel_params.item.value
-else
-    data:extend({
-        {
-            type = "recipe-category",
-            name = category
-        },
-        {
-            type = "item-subgroup",
-            name = category,
-            group = "intermediate-products"
-        }
-    })
-
-    --assembler
-    local assembler_proto = get_parent_assembler()
-    assembler_proto.name = assembler
-    assembler_proto.module_specification.module_slots = 0
-    assembler_proto.crafting_categories = {category}
-    assembler_proto.energy_usage = "10MW"
-    assembler_proto.allowed_effects = {}
-
-    assembler_proto.energy_source = {
-        type = "burner",
-        fuel_inventory_size = 1,
+data:extend({
+    {
+        type = "recipe-category",
+        name = category
+    },
+    {
+        type = "item-subgroup",
+        name = category,
+        group = "intermediate-products"
     }
+})
 
-    assembler_proto.tint = tint
+--assembler
+local assembler_proto = get_parent_assembler()
+assembler_proto.name = assembler
+assembler_proto.module_specification.module_slots = 0
+assembler_proto.crafting_categories = {category}
+assembler_proto.energy_usage = "10MW"
+assembler_proto.allowed_effects = {}
 
-    for _, anim in pairs(assembler_proto.animation) do
-        for _, layer in pairs(anim.layers) do
-            if layer.filename and not layer.draw_as_shadow and layer.hr_version then
-                layer.tint = tint
-                layer.hr_version.tint = tint
-            end
+assembler_proto.energy_source = {
+    type = "burner",
+    fuel_inventory_size = 1,
+}
+
+assembler_proto.icons = {{
+    icon = assembler_proto.icon,
+    icon_size = assembler_proto.icon_size,
+    icon_mipmaps = assembler_proto.icon_mipmaps,
+    tint = tint
+}}
+
+for _, anim in pairs(assembler_proto.animation) do
+    for _, layer in pairs(anim.layers) do
+        if layer.filename and not layer.draw_as_shadow and layer.hr_version then
+            layer.tint = tint
+            layer.hr_version.tint = tint
         end
     end
-
-    --items
-    local assembler_item_proto = table.deepcopy(data.raw["item"]["chemical-plant"])
-    assembler_item_proto.subgroup = "smelting-machine"
-    assembler_item_proto.name = assembler
-    assembler_item_proto.place_result = assembler
-    assembler_item_proto.icon = assembler_proto.icon
-    assembler_item_proto.icon_size = assembler_proto.icon_size
-    assembler_item_proto.icon_mipmaps = assembler_proto.icon_mipmaps
-
-    local fuel_proto = table.deepcopy(data.raw["item"]["solid-fuel"])
-    fuel_proto.name = fuel_params.item.name
-    fuel_proto.fuel_value = fuel_params.item.value
-
-    fuel_proto.tint = tint
-
-    data:extend({assembler_proto, assembler_item_proto, fuel_proto})
-    data:extend({
-        {
-            type = "recipe",
-            name = fuel_params.item.name,
-            enabled = true,
-            energy_required = 1,
-            ingredients = {},
-            category = category,
-            results = {{type = 'item', name = fuel_params.item.name, amount = 1}},
-        }
-    })
-    item_recipe_name = fuel_params.item.name
 end
 
-data.raw["recipe"][item_recipe_name].energy_required = timeToCraft
+--items
+local assembler_item_proto = table.deepcopy(data.raw["item"][parent_assembler_name])
+assembler_item_proto.subgroup = "smelting-machine"
+assembler_item_proto.name = assembler
+assembler_item_proto.place_result = assembler
+assembler_item_proto.icons = assembler_proto.icons
+
+local fuel_proto = table.deepcopy(data.raw["item"]["solid-fuel"])
+fuel_proto.name = fuel_params.item.name
+fuel_proto.fuel_value = fuel_params.item.value
+fuel_proto.tint = tint
+
+fuel_proto.icons = {{
+    icon = fuel_proto.icon,
+    icon_size = fuel_proto.icon_size,
+    icon_mipmaps = fuel_proto.icon_mipmaps,
+    tint = tint
+}}
+
+--wipe icons
+local protos = {assembler_proto, assembler_item_proto, fuel_proto}
+local icon_list = {"icon", "icon_size", "icon_mipmaps"}
+for _, proto in pairs(protos) do
+    for _, key_icon in pairs(icon_list) do
+        proto[key_icon] = nil
+    end
+end
+
+data:extend(protos)
+data:extend({
+    {
+        type = "recipe",
+        name = fuel_params.item.name,
+        enabled = true,
+        energy_required = timeToCraft,
+        ingredients = {},
+        category = category,
+        results = {{type = 'item', name = fuel_params.item.name, amount = 1}},
+    }
+})
 
 --fluid
 data:extend({
@@ -138,17 +146,13 @@ local input_fb = {
     base_level = -1,
     height = 2,
 }
-local asm_fluid_input = 'fluid-'..assembler
+local asm_fluid_input = fluid_assembler
 local assembler_proto = table.deepcopy(data.raw["assembling-machine"][assembler])
 assembler_proto.name = asm_fluid_input
+
 if assembler_proto.icons then
     assembler_proto.icons[1].tint = table.deepcopy(tint)
     assembler_proto.icons[1].tint[3] = 0.8
-else
-    if not assembler_proto.tint then
-        assembler_proto.tint = tint
-    end
-    assembler_proto.tint[3] = 0.8
 end
 
 if not assembler_proto.fluid_boxes then
@@ -175,4 +179,25 @@ local assembler_item_proto = table.deepcopy(data.raw["item"][assembler])
 assembler_item_proto.name = asm_fluid_input
 assembler_item_proto.place_result = asm_fluid_input
 
-data:extend({assembler_proto, assembler_item_proto})
+data:extend({assembler_proto,
+    assembler_item_proto,
+    {
+        type = "recipe",
+        name = assembler,
+        enabled = true,
+        energy_required = 1,
+        ingredients = {{type = "item", name = parent_assembler_name, amount = 1}},
+        category = "crafting",
+        results = {{type = 'item', name = assembler, amount = 1}},
+    },
+    {
+        type = "recipe",
+        name = fluid_assembler,
+        enabled = true,
+        energy_required = 1,
+        ingredients = {{type = "item", name = parent_assembler_name, amount = 1}},
+        category = "crafting",
+        results = {{type = 'item', name = fluid_assembler, amount = 1}},
+    },
+})
+
