@@ -178,7 +178,7 @@ assembler_proto.energy_source = {
 local assembler_item_proto = table.deepcopy(data.raw["item"][assembler])
 assembler_item_proto.name = asm_fluid_input
 assembler_item_proto.place_result = asm_fluid_input
-
+local ingredients = data.raw["recipe"][parent_assembler_name].ingredients
 data:extend({assembler_proto,
     assembler_item_proto,
     {
@@ -186,18 +186,49 @@ data:extend({assembler_proto,
         name = assembler,
         enabled = true,
         energy_required = 1,
-        ingredients = {{type = "item", name = parent_assembler_name, amount = 1}},
+        ingredients = ingredients,
         category = "crafting",
         results = {{type = 'item', name = assembler, amount = 1}},
     },
     {
         type = "recipe",
-        name = fluid_assembler,
+        name = assembler.."-recraft",
         enabled = true,
         energy_required = 1,
-        ingredients = {{type = "item", name = parent_assembler_name, amount = 1}},
+        ingredients = {{type = "item", name = fluid_assembler, amount = 1}},
+        category = "crafting",
+        results = {{type = 'item', name = assembler, amount = 1}},
+    },
+    {
+        type = "recipe",
+        name = fluid_assembler.."-recraft",
+        enabled = true,
+        energy_required = 1,
+        ingredients = {{type = "item", name = assembler, amount = 1}},
         category = "crafting",
         results = {{type = 'item', name = fluid_assembler, amount = 1}},
     },
 })
 
+local function add_tech(tbl)
+    for key, value in pairs({assembler, fluid_assembler}) do
+        if data.raw["recipe"][value] then
+            data.raw["recipe"][value].enabled = false
+            table.insert(tbl.effects, {type="unlock-recipe", recipe=value})
+        end
+        table.insert(tbl.effects, {type="unlock-recipe", recipe=value.."-recraft"})
+        data.raw["recipe"][value.."-recraft"].enabled = false
+    end
+end
+
+for _, value in pairs(data.raw["technology"]) do
+    if value.effects then
+        for _, effect in pairs(value.effects) do
+            if effect.type == "unlock-recipe" and effect.recipe == parent_assembler_name then
+                add_tech(data.raw["technology"]["oil-processing"])
+            end
+        end
+    end
+end
+
+    

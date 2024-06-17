@@ -1,5 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2024-06-17
+  Changes:
+    - Added fuel in the form of ​liquid and item
+    - Added 2 converters that accept liquid and items
+    - Added efficiency setting
+    - Added tech for converters
+---------------------------------------------------------------------------------------------------
 Version: 0.0.0
-Date: 1970-01-01
+Date: 1970-05-12
   Info:
     - currently an empty mod, this version is only here to mark the start date of the project
