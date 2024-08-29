@@ -41,6 +41,7 @@ assembler_proto.module_specification.module_slots = 0
 assembler_proto.crafting_categories = {category}
 assembler_proto.energy_usage = "10MW"
 assembler_proto.allowed_effects = {}
+assembler_proto.minable.result = assembler
 
 assembler_proto.energy_source = {
     type = "burner",
@@ -173,6 +174,7 @@ assembler_proto.energy_source = {
     burns_fluid = true,
     scale_fluid_usage = true
 }
+assembler_proto.minable.result = fluid_assembler
 
 --items
 local assembler_item_proto = table.deepcopy(data.raw["item"][assembler])
