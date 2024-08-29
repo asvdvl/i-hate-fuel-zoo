@@ -3,7 +3,7 @@
     "name": "i-hate-fuel-zoo",
     "author": "asvdev(in game - Dial-up)",
     "factorio_version": "1.1",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "dependencies": ["base >= 1.1.0"],
     "description": "a mod that allows you to convert all flammable materials and liquids into one type",
     "homepage": "https://github.com/asvdvl/i-hate-fuel-zoo",
